@@ -1,0 +1,32 @@
+%this script is designed to read fcs files, output them as csv files, and
+%print the fl2 channel as a histogram for all files
+
+%initialize directories. IMPORTANT NOTES:
+%change input directory
+%need to make a destination directory within the input directory called
+%"output" before running this script
+
+input_dir = '/Volumes/PHD/hinshaw/Documents/data/yeast/20160203_phostaggel_scans/20160131_cellcyclesamples/samples/';
+output_dir = fullfile(input_dir,'output');
+file_list_1 = dir(fullfile(input_dir,'*00*'));
+nofiles = size(file_list_1);
+alldata = zeros(10000,nofiles(1));
+
+
+for i=1:nofiles(1);
+    filename = getfield(file_list_1,{i}, 'name');
+    filename_full = fullfile(input_dir,filename);
+    csvwrite(fullfile(output_dir,filename),fcsread(filename_full));
+    alldata(:,i) = csvread(fullfile(output_dir,filename),0,3,[0,3,9999,3]);
+end
+
+
+%now make a figure with as many panels as there are samples, each holding a
+%histogram for the data corresponding to a gien sample
+
+for i = 1:nofiles(1);
+    subplot(nofiles(1),1,i);
+    hist(alldata(:,i),200);
+    set(gca,'xlim',[50 400])
+    hold on;
+end
